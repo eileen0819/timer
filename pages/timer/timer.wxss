@@ -18,7 +18,9 @@
 }
 
 .project-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
   padding: 10rpx 18rpx;
   border-radius: 999rpx;
   border: var(--border-thin);
@@ -27,6 +29,27 @@
   font-size: 26rpx;
   font-weight: 900;
   color: var(--text-main);
+}
+
+.date-tag {
+  padding-right: 10rpx;
+}
+
+.tag-icon {
+  font-size: 26rpx;
+  line-height: 1;
+}
+
+.date-input {
+  width: 140rpx;
+  height: 34rpx;
+  line-height: 34rpx;
+  font-size: 26rpx;
+  font-weight: 900;
+  color: var(--text-main);
+  background: transparent;
+  padding: 0;
+  margin: 0;
 }
 
 .project-name {

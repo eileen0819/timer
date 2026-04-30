@@ -9,9 +9,10 @@ Page({
     currentTime: 0,
     displayTime: '00:00:00',
     records: [],
-    todayTotal: 0,
-    todayTotalMinutes: 0,
-    todayLabel: '',
+    selectedDateStr: '',
+    selectedDateMd: '',
+    selectedTotalSeconds: 0,
+    selectedTotalMinutes: 0,
     showManualDialog: false,
     inputDateMd: '',
     inputHours: '',
@@ -21,38 +22,41 @@ Page({
 
   onLoad: function (options) {
     const currentChild = store.getCurrentChild();
-    const todayLabel = this.formatMonthDayFromDateStr(store.todayStr());
+    const selectedDateStr = store.todayStr();
+    const selectedDateMd = this.formatMonthDayFromDateStr(selectedDateStr);
     this.setData({
       projectId: options.projectId || '',
       projectName: options.projectName || '未选择项目',
       childId: currentChild ? currentChild._id : '',
-      todayLabel,
-      inputDateMd: todayLabel
+      selectedDateStr,
+      selectedDateMd,
+      inputDateMd: selectedDateMd
     });
-    this.loadTodayRecords();
+    this.loadRecordsByDate(selectedDateStr);
   },
 
   onUnload: function () {
     this.stopTimer();
   },
 
-  loadTodayRecords: function () {
+  loadRecordsByDate: function (dateStr) {
     if (!this.data.projectId) return;
 
-    const today = store.todayStr();
     const records = store.listRecordsByProjectAndDate({
       projectId: this.data.projectId,
       childId: this.data.childId,
-      date: today
+      date: dateStr
     });
 
     let total = 0;
     records.forEach((r) => (total += r.duration));
+    const selectedDateMd = this.formatMonthDayFromDateStr(dateStr);
     this.setData({
       records,
-      todayTotal: total,
-      todayTotalMinutes: Math.floor(total / 60),
-      todayLabel: this.formatMonthDayFromDateStr(today)
+      selectedDateStr: dateStr,
+      selectedDateMd,
+      selectedTotalSeconds: total,
+      selectedTotalMinutes: Math.floor(total / 60)
     });
   },
 
@@ -87,12 +91,26 @@ Page({
     return `${year}-${mm}-${dd}`;
   },
 
+  onSelectedDateInput: function (e) {
+    this.setData({ selectedDateMd: e.detail.value });
+  },
+
+  onSelectedDateBlur: function () {
+    const dateStr = this.parseMonthDayToDateStr(this.data.selectedDateMd);
+    if (!dateStr) {
+      wx.showToast({ title: '日期格式不正确（如 4月30日）', icon: 'none' });
+      this.setData({ selectedDateMd: this.formatMonthDayFromDateStr(this.data.selectedDateStr) });
+      return;
+    }
+    this.loadRecordsByDate(dateStr);
+  },
+
   showManualDialog: function () {
     this.setData({
       showManualDialog: true,
       inputHours: '',
       inputMinutes: '',
-      inputDateMd: this.formatMonthDayFromDateStr(store.todayStr())
+      inputDateMd: this.data.selectedDateMd || this.formatMonthDayFromDateStr(store.todayStr())
     });
   },
 
@@ -165,7 +183,7 @@ Page({
 
     wx.showToast({ title: '记录成功', icon: 'success' });
     this.hideManualDialog();
-    this.loadTodayRecords();
+    this.loadRecordsByDate(recordDate);
   },
 
   startTimer: function () {
@@ -225,23 +243,25 @@ Page({
       return;
     }
 
+    const recordDate = this.data.selectedDateStr || store.todayStr();
     store.addRecord({
       projectId: this.data.projectId,
       projectName: this.data.projectName,
       childId: this.data.childId,
-      duration: this.data.currentTime
+      duration: this.data.currentTime,
+      date: recordDate
     });
 
     // 更新项目的总时长和今日时长
-    this.updateProjectTime(this.data.currentTime);
+    this.updateProjectTime(this.data.currentTime, recordDate);
 
     wx.showToast({ title: '记录成功', icon: 'success' });
     this.resetTimer();
-    this.loadTodayRecords();
+    this.loadRecordsByDate(recordDate);
   },
 
-  updateProjectTime: function (duration) {
-    store.updateProjectTime(this.data.projectId, duration);
+  updateProjectTime: function (duration, recordDateStr) {
+    store.updateProjectTime(this.data.projectId, duration, recordDateStr);
   },
 
   formatDisplayTime: function (seconds) {
