@@ -11,7 +11,12 @@ Page({
     records: [],
     todayTotal: 0,
     todayTotalMinutes: 0,
-    todayLabel: ''
+    todayLabel: '',
+    showManualDialog: false,
+    inputDateMd: '',
+    inputHours: '',
+    inputMinutes: '',
+    minuteOptions: [3, 5, 10, 15, 25, 35, 45, 60]
   },
 
   onLoad: function (options) {
@@ -21,7 +26,8 @@ Page({
       projectId: options.projectId || '',
       projectName: options.projectName || '未选择项目',
       childId: currentChild ? currentChild._id : '',
-      todayLabel
+      todayLabel,
+      inputDateMd: todayLabel
     });
     this.loadTodayRecords();
   },
@@ -50,6 +56,8 @@ Page({
     });
   },
 
+  stopBubble: function () {},
+
   formatMonthDayFromDateStr: function (dateStr) {
     if (!dateStr) return '';
     const parts = String(dateStr).split('-');
@@ -58,6 +66,106 @@ Page({
     const d = parseInt(parts[2], 10);
     if (!m || !d) return '';
     return `${m}月${d}日`;
+  },
+
+  parseMonthDayToDateStr: function (text) {
+    const raw = String(text || '').trim();
+    if (!raw) return store.todayStr();
+    const m = raw.match(/^\s*(\d{1,2})\s*(?:月|\/|-|\.)\s*(\d{1,2})\s*(?:日|号)?\s*$/);
+    if (!m) return null;
+
+    const month = parseInt(m[1], 10);
+    const day = parseInt(m[2], 10);
+    const year = new Date().getFullYear();
+
+    if (!month || !day || month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const dt = new Date(year, month - 1, day);
+    if (dt.getFullYear() !== year || dt.getMonth() + 1 !== month || dt.getDate() !== day) return null;
+
+    const mm = String(month).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    return `${year}-${mm}-${dd}`;
+  },
+
+  showManualDialog: function () {
+    this.setData({
+      showManualDialog: true,
+      inputHours: '',
+      inputMinutes: '',
+      inputDateMd: this.formatMonthDayFromDateStr(store.todayStr())
+    });
+  },
+
+  hideManualDialog: function () {
+    this.setData({ showManualDialog: false });
+  },
+
+  onHoursInput: function (e) {
+    this.setData({ inputHours: e.detail.value });
+  },
+
+  onMinutesInput: function (e) {
+    this.setData({ inputMinutes: e.detail.value });
+  },
+
+  onDateMdInput: function (e) {
+    this.setData({ inputDateMd: e.detail.value });
+  },
+
+  onMinuteOptionChange: function (e) {
+    const idx = parseInt(e.detail.value, 10);
+    const v = this.data.minuteOptions && this.data.minuteOptions[idx];
+    if (v === undefined || v === null) return;
+    this.setData({ inputMinutes: String(v) });
+  },
+
+  saveManualRecord: function () {
+    if (!this.data.childId) {
+      wx.showToast({ title: '请先在首页添加/选择宝贝', icon: 'none' });
+      return;
+    }
+
+    if (!this.data.projectId) {
+      wx.showToast({ title: '请先选择项目', icon: 'none' });
+      return;
+    }
+
+    const rawHours = parseInt(this.data.inputHours) || 0;
+    const rawMinutes = parseInt(this.data.inputMinutes) || 0;
+
+    if (rawHours === 0 && rawMinutes === 0) {
+      wx.showToast({ title: '请输入有效时长', icon: 'none' });
+      return;
+    }
+
+    if (rawHours < 0 || rawMinutes < 0) {
+      wx.showToast({ title: '时长格式不正确', icon: 'none' });
+      return;
+    }
+
+    const hours = rawHours + Math.floor(rawMinutes / 60);
+    const minutes = rawMinutes % 60;
+    const totalSeconds = (hours * 3600) + (minutes * 60);
+    const recordDate = this.parseMonthDayToDateStr(this.data.inputDateMd);
+    if (!recordDate) {
+      wx.showToast({ title: '日期格式不正确（如 4月30日）', icon: 'none' });
+      return;
+    }
+
+    wx.showLoading({ title: '保存中...' });
+    store.addRecord({
+      projectId: this.data.projectId,
+      projectName: this.data.projectName,
+      childId: this.data.childId,
+      duration: totalSeconds,
+      date: recordDate
+    });
+    store.updateProjectTime(this.data.projectId, totalSeconds, recordDate);
+    wx.hideLoading();
+
+    wx.showToast({ title: '记录成功', icon: 'success' });
+    this.hideManualDialog();
+    this.loadTodayRecords();
   },
 
   startTimer: function () {

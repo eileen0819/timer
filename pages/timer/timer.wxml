@@ -28,6 +28,10 @@ module.exports = {
     <text class="timer-hint" wx:else>已暂停</text>
   </view>
 
+  <view class="manual-entry">
+    <button class="manual-btn" bindtap="showManualDialog">📝 手动录入</button>
+  </view>
+
   <view class="timer-controls">
     <view class="control-btn {{isRunning ? 'pause' : 'start'}}" bindtap="{{isRunning ? 'pauseTimer' : 'startTimer'}}">
       <text class="control-icon">{{isRunning ? '⏸' : '▶'}}</text>
@@ -56,6 +60,54 @@ module.exports = {
     <view class="today-summary">
       <text class="summary-label">今日总计:</text>
       <text class="summary-value">{{utils.formatDuration(todayTotal)}}</text>
+    </view>
+  </view>
+
+  <view class="modal" wx:if="{{showManualDialog}}" bindtap="hideManualDialog">
+    <view class="modal-content" catchtap="stopBubble">
+      <text class="modal-title">手动录入 - {{projectName}}</text>
+
+      <input
+        class="input-field"
+        placeholder="日期（如：4月30日）"
+        value="{{inputDateMd}}"
+        bindinput="onDateMdInput"
+      />
+
+      <picker mode="selector" range="{{minuteOptions}}" bindchange="onMinuteOptionChange">
+        <view class="input-field picker-view">
+          快捷选择分钟
+        </view>
+      </picker>
+
+      <view class="time-inputs">
+        <view class="time-input-group">
+          <input
+            class="time-input"
+            type="number"
+            placeholder="0"
+            value="{{inputHours}}"
+            bindinput="onHoursInput"
+          />
+          <text class="time-unit">小时</text>
+        </view>
+        <text class="time-separator">:</text>
+        <view class="time-input-group">
+          <input
+            class="time-input"
+            type="number"
+            placeholder="0"
+            value="{{inputMinutes}}"
+            bindinput="onMinutesInput"
+          />
+          <text class="time-unit">分钟</text>
+        </view>
+      </view>
+
+      <view class="modal-buttons">
+        <button class="btn-cancel" bindtap="hideManualDialog">取消</button>
+        <button class="btn-confirm" bindtap="saveManualRecord">确认</button>
+      </view>
     </view>
   </view>
 </view>
