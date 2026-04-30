@@ -128,14 +128,22 @@ function updateProject(projectId, patch) {
   return all[idx];
 }
 
-function updateProjectTime(projectId, durationSeconds) {
+function updateProjectTime(projectId, durationSeconds, recordDateStr) {
   const all = listProjectsAll();
   const idx = all.findIndex((p) => p._id === projectId);
   if (idx === -1) return null;
 
   const today = todayStr();
+  const recordDate = recordDateStr || today;
   const p = all[idx];
   const totalTime = (p.totalTime || 0) + durationSeconds;
+
+  if (recordDate !== today) {
+    all[idx] = { ...p, totalTime };
+    saveProjectsAll(all);
+    return all[idx];
+  }
+
   let todayTime = p.todayTime || 0;
   let lastRecordDate = p.lastRecordDate || null;
 
@@ -160,7 +168,7 @@ function saveRecordsAll(records) {
   safeSet(KEYS.RECORDS, records || []);
 }
 
-function addRecord({ projectId, projectName, childId, duration }) {
+function addRecord({ projectId, projectName, childId, duration, date }) {
   const all = listRecordsAll();
   const record = {
     _id: genId('record'),
@@ -168,7 +176,7 @@ function addRecord({ projectId, projectName, childId, duration }) {
     projectName,
     childId,
     duration,
-    date: todayStr(),
+    date: date || todayStr(),
     createTime: nowTimeStr()
   };
   all.unshift(record);
@@ -206,4 +214,3 @@ module.exports = {
   // helpers (for pages)
   todayStr
 };
-

@@ -15,6 +15,10 @@ module.exports = {
 <view class="container">
   <view class="project-info">
     <text class="project-name">{{projectName}}</text>
+    <view class="project-tags" wx:if="{{projectId}}">
+      <text class="project-tag">📅 {{todayLabel}}</text>
+      <text class="project-tag">已投入 {{todayTotalMinutes}} 分钟</text>
+    </view>
   </view>
 
   <view class="timer-display">

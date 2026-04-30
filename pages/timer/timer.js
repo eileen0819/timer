@@ -9,15 +9,19 @@ Page({
     currentTime: 0,
     displayTime: '00:00:00',
     records: [],
-    todayTotal: 0
+    todayTotal: 0,
+    todayTotalMinutes: 0,
+    todayLabel: ''
   },
 
   onLoad: function (options) {
     const currentChild = store.getCurrentChild();
+    const todayLabel = this.formatMonthDayFromDateStr(store.todayStr());
     this.setData({
       projectId: options.projectId || '',
       projectName: options.projectName || '未选择项目',
-      childId: currentChild ? currentChild._id : ''
+      childId: currentChild ? currentChild._id : '',
+      todayLabel
     });
     this.loadTodayRecords();
   },
@@ -40,8 +44,20 @@ Page({
     records.forEach((r) => (total += r.duration));
     this.setData({
       records,
-      todayTotal: total
+      todayTotal: total,
+      todayTotalMinutes: Math.floor(total / 60),
+      todayLabel: this.formatMonthDayFromDateStr(today)
     });
+  },
+
+  formatMonthDayFromDateStr: function (dateStr) {
+    if (!dateStr) return '';
+    const parts = String(dateStr).split('-');
+    if (parts.length !== 3) return '';
+    const m = parseInt(parts[1], 10);
+    const d = parseInt(parts[2], 10);
+    if (!m || !d) return '';
+    return `${m}月${d}日`;
   },
 
   startTimer: function () {

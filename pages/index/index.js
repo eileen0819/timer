@@ -4,6 +4,7 @@ Page({
   data: {
     projects: [],
     groupedProjects: [],
+    totalAllMinutes: 0,
     categories: [
       { id: 'book', name: '绘本', icon: '📚' },
       { id: 'song', name: '儿歌', icon: '🎵' },
@@ -18,6 +19,8 @@ Page({
     selectedProjectName: '',
     inputHours: '',
     inputMinutes: '',
+    inputDateMd: '',
+    minuteOptions: [15, 25, 35, 45, 60],
     showWelcomePage: false,
     childNameInput: '',
     childBirthMonth: '',
@@ -120,6 +123,8 @@ Page({
       this.checkChildProfile(); // Refresh list in case of changes
     }
   },
+
+  stopBubble: function () {},
 
   checkChildProfile: function () {
     const childrenList = store.listChildren();
@@ -259,7 +264,7 @@ Page({
 
   processGroupedProjects: function (rawProjects) {
     const groups = {};
-    let totalTodaySeconds = 0;
+    let totalAllSeconds = 0;
     
     // 初始化预设分类分组
     this.data.categories.forEach(cat => {
@@ -280,18 +285,17 @@ Page({
         groups['other'].items.push(project);
       }
       
-      // 累加今日专注总时长
-      totalTodaySeconds += (project.todayTime || 0);
+      totalAllSeconds += (project.totalTime || 0);
     });
 
     // 转换为数组并过滤掉空分组
     const groupedProjects = Object.values(groups).filter(group => group.items.length > 0);
-    const totalTodayMinutes = Math.floor(totalTodaySeconds / 60);
+    const totalAllMinutes = Math.floor(totalAllSeconds / 60);
 
     this.setData({
       projects: rawProjects,
       groupedProjects: groupedProjects,
-      totalTodayMinutes: totalTodayMinutes
+      totalAllMinutes
     });
   },
 
@@ -299,6 +303,47 @@ Page({
     wx.navigateTo({
       url: '/pages/statistics/statistics'
     });
+  },
+
+  goToTimer: function (e) {
+    const projectId = e.currentTarget.dataset.id;
+    const projectName = e.currentTarget.dataset.name;
+    if (!projectId) {
+      wx.showToast({ title: '未找到项目', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/timer/timer?projectId=${projectId}&projectName=${encodeURIComponent(projectName || '')}`
+    });
+  },
+
+  formatMonthDayFromDateStr: function (dateStr) {
+    if (!dateStr) return '';
+    const parts = String(dateStr).split('-');
+    if (parts.length !== 3) return '';
+    const m = parseInt(parts[1], 10);
+    const d = parseInt(parts[2], 10);
+    if (!m || !d) return '';
+    return `${m}月${d}日`;
+  },
+
+  parseMonthDayToDateStr: function (text) {
+    const raw = String(text || '').trim();
+    if (!raw) return store.todayStr();
+    const m = raw.match(/^\s*(\d{1,2})\s*(?:月|\/|-|\.)\s*(\d{1,2})\s*(?:日|号)?\s*$/);
+    if (!m) return null;
+
+    const month = parseInt(m[1], 10);
+    const day = parseInt(m[2], 10);
+    const year = new Date().getFullYear();
+
+    if (!month || !day || month < 1 || month > 12 || day < 1 || day > 31) return null;
+    const dt = new Date(year, month - 1, day);
+    if (dt.getFullYear() !== year || dt.getMonth() + 1 !== month || dt.getDate() !== day) return null;
+
+    const mm = String(month).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    return `${year}-${mm}-${dd}`;
   },
 
   showAddProject: function () {
@@ -365,12 +410,14 @@ Page({
   showTimeInput: function (e) {
     const projectId = e.currentTarget.dataset.id;
     const projectName = e.currentTarget.dataset.name;
+    const todayMd = this.formatMonthDayFromDateStr(store.todayStr());
     this.setData({
       showTimeDialog: true,
       selectedProjectId: projectId,
       selectedProjectName: projectName,
       inputHours: '',
-      inputMinutes: ''
+      inputMinutes: '',
+      inputDateMd: todayMd
     });
   },
 
@@ -388,21 +435,39 @@ Page({
     this.setData({ inputMinutes: e.detail.value });
   },
 
+  onDateMdInput: function (e) {
+    this.setData({ inputDateMd: e.detail.value });
+  },
+
+  onMinuteOptionChange: function (e) {
+    const idx = parseInt(e.detail.value, 10);
+    const v = this.data.minuteOptions && this.data.minuteOptions[idx];
+    if (v === undefined || v === null) return;
+    this.setData({ inputMinutes: String(v) });
+  },
+
   saveTimeRecord: function () {
-    const hours = parseInt(this.data.inputHours) || 0;
-    const minutes = parseInt(this.data.inputMinutes) || 0;
+    const rawHours = parseInt(this.data.inputHours) || 0;
+    const rawMinutes = parseInt(this.data.inputMinutes) || 0;
     
-    if (hours === 0 && minutes === 0) {
+    if (rawHours === 0 && rawMinutes === 0) {
       wx.showToast({ title: '请输入有效时长', icon: 'none' });
       return;
     }
     
-    if (hours < 0 || minutes < 0 || minutes >= 60) {
+    if (rawHours < 0 || rawMinutes < 0) {
       wx.showToast({ title: '时长格式不正确', icon: 'none' });
       return;
     }
 
+    const hours = rawHours + Math.floor(rawMinutes / 60);
+    const minutes = rawMinutes % 60;
     const totalSeconds = (hours * 3600) + (minutes * 60);
+    const recordDate = this.parseMonthDayToDateStr(this.data.inputDateMd);
+    if (!recordDate) {
+      wx.showToast({ title: '日期格式不正确（如 4月30日）', icon: 'none' });
+      return;
+    }
 
     if (!this.data.currentChild || !this.data.currentChild._id) {
       wx.showToast({ title: '请先选择宝贝', icon: 'none' });
@@ -414,9 +479,10 @@ Page({
       projectId: this.data.selectedProjectId,
       projectName: this.data.selectedProjectName,
       childId: this.data.currentChild._id,
-      duration: totalSeconds
+      duration: totalSeconds,
+      date: recordDate
     });
-    store.updateProjectTime(this.data.selectedProjectId, totalSeconds);
+    store.updateProjectTime(this.data.selectedProjectId, totalSeconds, recordDate);
     wx.hideLoading();
 
     wx.showToast({ title: '记录成功', icon: 'success' });

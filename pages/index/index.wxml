@@ -38,9 +38,9 @@ module.exports = {
   <view class="main">
     <!-- 专注概览卡片 -->
     <view class="focus-summary">
-      <text class="summary-label">Today's Focus</text>
+      <text class="summary-label">累计投入</text>
       <view class="summary-time">
-        <text class="time-value">{{totalTodayMinutes || 0}}</text>
+        <text class="time-value">{{totalAllMinutes || 0}}</text>
         <text class="time-unit">min</text>
       </view>
     </view>
@@ -74,10 +74,15 @@ module.exports = {
               <text class="task-title">{{item.name}}</text>
               <view class="task-meta">
                 <text class="emoji-icon" style="font-size: 24rpx; margin-right: 8rpx;">⏱️</text>
-                <text class="meta-text">{{utils.formatTime(item.todayTime)}} 今日 / 目标 {{item.targetTime ? utils.formatTime(item.targetTime) : '未设置'}}</text>
+                <text class="meta-text">{{utils.formatTime(item.totalTime)}} 累计 / 目标 {{item.targetTime ? utils.formatTime(item.targetTime) : '未设置'}}</text>
               </view>
             </view>
-            <view class="play-btn">
+            <view
+              class="play-btn"
+              catchtap="goToTimer"
+              data-id="{{item._id}}"
+              data-name="{{item.name}}"
+            >
               <text class="emoji-icon" style="font-size: 28rpx;">▶️</text>
             </view>
           </view>
@@ -226,6 +231,19 @@ module.exports = {
   <view class="modal" wx:if="{{showTimeDialog}}" bindtap="hideTimeDialog">
     <view class="modal-content" catchtap="stopBubble">
       <text class="modal-title">记录时长 - {{selectedProjectName}}</text>
+
+      <input
+        class="input-field"
+        placeholder="日期（如：4月30日）"
+        value="{{inputDateMd}}"
+        bindinput="onDateMdInput"
+      />
+
+      <picker mode="selector" range="{{minuteOptions}}" bindchange="onMinuteOptionChange">
+        <view class="input-field picker-view">
+          快捷选择分钟（{{minuteOptions && minuteOptions.length ? minuteOptions[0] : ''}}）
+        </view>
+      </picker>
       
       <view class="time-inputs">
         <view class="time-input-group">

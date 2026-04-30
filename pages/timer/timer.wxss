@@ -9,6 +9,26 @@
   margin-bottom: 60rpx;
 }
 
+.project-tags {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 24rpx;
+  flex-wrap: wrap;
+}
+
+.project-tag {
+  display: inline-block;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  border: var(--border-thin);
+  background-color: #ffffff;
+  box-shadow: 2rpx 2rpx 0px var(--text-main);
+  font-size: 26rpx;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
 .project-name {
   display: inline-block;
   font-family: var(--font-display);
