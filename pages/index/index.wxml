@@ -49,6 +49,9 @@ module.exports = {
     <view class="section">
       <view class="section-header">
         <text class="section-title">Up Next</text>
+        <button class="section-add-btn" bindtap="showAddProject" aria-label="Add project">
+          <text>➕</text>
+        </button>
       </view>
       
       <view class="task-list" wx:if="{{groupedProjects.length > 0}}">
@@ -94,24 +97,6 @@ module.exports = {
         <text class="empty-text">还没有项目</text>
         <text class="empty-hint">点击下方按钮添加第一个学习项目</text>
       </view>
-    </view>
-  </view>
-
-  <!-- 悬浮操作按钮 -->
-  <view class="fab-container">
-    <button class="fab" bindtap="showAddProject" aria-label="Add new task">
-      <text class="emoji-icon" style="font-size: 56rpx; line-height: 1; margin-top: -8rpx;">➕</text>
-    </button>
-    
-    <!-- 开发者导入预置资源按钮 -->
-    <view style="padding: 40rpx 0;">
-      <button 
-        class="welcome-btn" 
-        style="background-color: var(--accent-blue); transform: rotate(0deg); width: 80%; margin: 0 auto; height: 90rpx; font-size: 28rpx;"
-        bindtap="importResourcesData"
-      >
-        <text>📦 导入资源库数据 (测试用)</text>
-      </button>
     </view>
   </view>
 
@@ -241,7 +226,7 @@ module.exports = {
 
       <picker mode="selector" range="{{minuteOptions}}" bindchange="onMinuteOptionChange">
         <view class="input-field picker-view">
-          快捷选择分钟（{{minuteOptions && minuteOptions.length ? minuteOptions[0] : ''}}）
+          快捷选择分钟
         </view>
       </picker>
       

@@ -20,7 +20,7 @@ Page({
     inputHours: '',
     inputMinutes: '',
     inputDateMd: '',
-    minuteOptions: [15, 25, 35, 45, 60],
+    minuteOptions: [3, 5, 10, 15, 25, 35, 45, 60],
     showWelcomePage: false,
     childNameInput: '',
     childBirthMonth: '',
