@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Timer Pro - Focus Beautifully</title>
+  <!-- Google Fonts: 引入 Quicksand (圆润童趣的英文字体) 和 Noto Sans SC (干净的无衬线中文) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* 
+      设计系统 (Design System)
+      风格: Refined Neo-Brutalist Kawaii (Apple 级别的留白与排版 + 高饱和度童趣元素)
+    */
+    :root {
+      --bg-color: #FFFDF7; /* 温暖的奶黄底色 */
+      --text-main: #2D3436; /* 极深灰，代替纯黑 */
+      --text-muted: #636E72;
+      --accent-red: #FF6B6B;
+      --accent-green: #4ECDC4;
+      --accent-yellow: #FFE66D;
+      --accent-blue: #4D96FF;
+      
+      --border-thick: 6px solid var(--text-main);
+      --border-thin: 3px solid var(--text-main);
+      --shadow-hard: 6px 6px 0px var(--text-main);
+      --shadow-hard-hover: 2px 2px 0px var(--text-main);
+      
+      --radius-lg: 32px;
+      --radius-md: 20px;
+      --radius-sm: 12px;
+      
+      --font-display: 'Quicksand', 'Noto Sans SC', sans-serif;
+      --font-body: 'Noto Sans SC', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.5;
+      display: flex;
+      justify-content: center;
+      /* 模拟移动端居中显示 */
+      min-height: 100vh;
+      background-image: radial-gradient(var(--text-muted) 1px, transparent 1px);
+      background-size: 30px 30px;
+      background-position: -15px -15px;
+      background-color: #f4f0e6; /* 稍微深一点的背景衬托设备框 */
+    }
+
+    /* 移动端设备框模拟 */
+    .device-frame {
+      width: 100%;
+      max-width: 414px; /* iPhone Max 宽度 */
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    @media (min-width: 415px) {
+      .device-frame {
+        height: 896px;
+        min-height: auto;
+        margin-top: 40px;
+        margin-bottom: 40px;
+        border-radius: 40px;
+        border: 12px solid #1a1a1a;
+      }
+    }
+
+    /* ================= Header ================= */
+    header {
+      padding: 30px 24px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: var(--border-thin);
+      box-shadow: 3px 3px 0px var(--text-main);
+      /* 使用 Unsplash 高质量头像 */
+      background-image: url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .greeting h1 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .greeting p {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .header-actions button {
+      background: #fff;
+      border: var(--border-thin);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 18px;
+      color: var(--text-main);
+      box-shadow: 3px 3px 0px var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .header-actions button:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px var(--text-main);
+    }
+
+    /* ================= Main Content ================= */
+    main {
+      flex: 1;
+      padding: 20px 24px;
+      overflow-y: auto;
+      padding-bottom: 120px; /* 给底部加号留空间 */
+    }
+
+    /* 顶部横幅：今日专注概览 */
+    .focus-summary {
+      background-color: var(--accent-yellow);
+      border: var(--border-thick);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-hard);
+      margin-bottom: 32px;
+      transform: rotate(-1deg);
+      transition: transform 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .focus-summary:hover {
+      transform: rotate(0deg) scale(1.02);
+    }
+
+    .focus-summary::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 100px;
+      height: 100px;
+      background-image: url('https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?auto=format&fit=crop&w=200&q=80');
+      background-size: cover;
+      opacity: 0.15;
+      border-radius: 50%;
+      mix-blend-mode: multiply;
+    }
+
+    .summary-label {
+      font-size: 14px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .summary-time {
+      font-family: var(--font-display);
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .summary-time span {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    /* 任务列表区 */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* 单个任务卡片 */
+    .task-card {
+      background: #fff;
+      border: var(--border-thin);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 4px 4px 0px var(--text-main);
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .task-card:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px var(--text-main);
+    }
+
+    .task-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      border: 2px solid var(--text-main);
+    }
+
+    .task-card.reading .task-icon { background-color: var(--accent-blue); color: #fff; }
+    .task-card.coding .task-icon { background-color: var(--accent-red); color: #fff; }
+    .task-card.design .task-icon { background-color: var(--accent-green); color: #fff; }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 800;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .task-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .play-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      border: 2px solid var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-left: 3px; /* 光学居中播放图标 */
+      color: var(--text-main);
+    }
+
+    /* ================= Floating Action Button ================= */
+    .fab-container {
+      position: absolute;
+      bottom: 100px;
+      right: 24px;
+      z-index: 100;
+    }
+
+    .fab {
+      width: 64px;
+      height: 64px;
+      background-color: var(--accent-green);
+      border-radius: 50%;
+      border: var(--border-thick);
+      box-shadow: var(--shadow-hard);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .fab i {
+      line-height: 1;
+      margin-top: 2px; /* FontAwesome 图标视觉居中微调 */
+    }
+
+    .fab:active {
+      transform: translate(4px, 4px);
+      box-shadow: 2px 2px 0px var(--text-main);
+    }
+
+    /* ================= Footer Navigation ================= */
+    footer {
+      background: #fff;
+      border-top: var(--border-thick);
+      padding: 16px 24px 24px;
+      display: flex;
+      justify-content: space-around;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 90;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 800;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 22px;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .nav-item.active {
+      color: var(--text-main);
+    }
+
+    .nav-item.active i {
+      transform: translateY(-4px) scale(1.1);
+      color: var(--accent-red);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="device-frame">
+    <!-- Header 语义化标签 -->
+    <header>
+      <div class="user-profile">
+        <div class="avatar"></div>
+        <div class="greeting">
+          <p>Good morning,</p>
+          <h1>Alex ✌️</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button><i class="fa-solid fa-chart-pie"></i></button>
+      </div>
+    </header>
+
+    <!-- Main 语义化标签 -->
+    <main>
+      <!-- 专注概览卡片 -->
+      <section class="focus-summary">
+        <span class="summary-label">Today's Focus</span>
+        <div class="summary-time">
+          120<span>min</span>
+        </div>
+      </section>
+
+      <!-- 任务列表 -->
+      <section>
+        <div class="section-header">
+          <h2 class="section-title">Up Next</h2>
+        </div>
+        
+        <div class="task-list">
+          <!-- 任务 1 -->
+          <article class="task-card reading">
+            <div class="task-icon">
+              <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div class="task-content">
+              <h3 class="task-title">Read "Deep Work"</h3>
+              <div class="task-meta">
+                <i class="fa-regular fa-clock"></i> 45 min
+              </div>
+            </div>
+            <div class="play-btn">
+              <i class="fa-solid fa-play"></i>
+            </div>
+          </article>
+
+          <!-- 任务 2 -->
+          <article class="task-card coding">
+            <div class="task-icon">
+              <i class="fa-solid fa-code"></i>
+            </div>
+            <div class="task-content">
+              <h3 class="task-title">Fix UI Bugs</h3>
+              <div class="task-meta">
+                <i class="fa-regular fa-clock"></i> 25 min
+              </div>
+            </div>
+            <div class="play-btn">
+              <i class="fa-solid fa-play"></i>
+            </div>
+          </article>
+
+          <!-- 任务 3 -->
+          <article class="task-card design">
+            <div class="task-icon">
+              <i class="fa-solid fa-pen-nib"></i>
+            </div>
+            <div class="task-content">
+              <h3 class="task-title">Sketch App Logo</h3>
+              <div class="task-meta">
+                <i class="fa-regular fa-clock"></i> 60 min
+              </div>
+            </div>
+            <div class="play-btn">
+              <i class="fa-solid fa-play"></i>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- 悬浮操作按钮 -->
+    <div class="fab-container">
+      <button class="fab" aria-label="Add new task">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+
+    <!-- Footer 语义化标签 -->
+    <footer>
+      <a href="#" class="nav-item active">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-stopwatch"></i>
+        <span>Timer</span>
+      </a>
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-user"></i>
+        <span>Profile</span>
+      </a>
+    </footer>
+  </div>
+
+</body>
+</html>

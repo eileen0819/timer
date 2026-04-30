@@ -1,0 +1,57 @@
+<wxs module="utils">
+module.exports = {
+  formatDuration: function(seconds) {
+    if (!seconds) return '0秒';
+    var h = Math.floor(seconds / 3600);
+    var m = Math.floor((seconds % 3600) / 60);
+    var s = seconds % 60;
+    if (h > 0) return h + '时' + m + '分' + s + '秒';
+    if (m > 0) return m + '分' + s + '秒';
+    return s + '秒';
+  }
+}
+</wxs>
+
+<view class="container">
+  <view class="project-info">
+    <text class="project-name">{{projectName}}</text>
+  </view>
+
+  <view class="timer-display">
+    <text class="timer-time">{{displayTime}}</text>
+    <text class="timer-hint" wx:if="{{!isRunning && currentTime === 0}}">点击开始记录学习时间</text>
+    <text class="timer-hint" wx:elif="{{isRunning}}">学习中...</text>
+    <text class="timer-hint" wx:else>已暂停</text>
+  </view>
+
+  <view class="timer-controls">
+    <view class="control-btn {{isRunning ? 'pause' : 'start'}}" bindtap="{{isRunning ? 'pauseTimer' : 'startTimer'}}">
+      <text class="control-icon">{{isRunning ? '⏸' : '▶'}}</text>
+      <text class="control-text">{{isRunning ? '暂停' : '开始'}}</text>
+    </view>
+    
+    <view class="control-btn reset" bindtap="resetTimer">
+      <text class="control-icon">↺</text>
+      <text class="control-text">重置</text>
+    </view>
+    
+    <view class="control-btn save" bindtap="saveRecord">
+      <text class="control-icon">✓</text>
+      <text class="control-text">保存</text>
+    </view>
+  </view>
+
+  <view class="today-records" wx:if="{{records.length > 0}}">
+    <text class="section-title">今日记录</text>
+    <view class="records-list">
+      <view class="record-item" wx:for="{{records}}" wx:key="_id">
+        <text class="record-time">{{utils.formatDuration(item.duration)}}</text>
+        <text class="record-date">{{item.createTime}}</text>
+      </view>
+    </view>
+    <view class="today-summary">
+      <text class="summary-label">今日总计:</text>
+      <text class="summary-value">{{utils.formatDuration(todayTotal)}}</text>
+    </view>
+  </view>
+</view>

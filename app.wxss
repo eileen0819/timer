@@ -1,0 +1,101 @@
+/* 微信小程序不支持直接通过 @import url 引入外部 CDN，已移除以修复编译错误 */
+
+page {
+  /* 基础设计系统变量 */
+  --bg-color: #FFFDF7;
+  --text-main: #2D3436;
+  --text-muted: #636E72;
+  --accent-red: #FF6B6B;
+  --accent-green: #4ECDC4;
+  --accent-yellow: #FFE66D;
+  --accent-blue: #4D96FF;
+  
+  --border-thick: 6rpx solid var(--text-main);
+  --border-thin: 4rpx solid var(--text-main);
+  --shadow-hard: 8rpx 8rpx 0px var(--text-main);
+  --shadow-hard-hover: 2rpx 2rpx 0px var(--text-main);
+  
+  --radius-lg: 40rpx;
+  --radius-md: 24rpx;
+  --radius-sm: 16rpx;
+  
+  --font-display: 'Quicksand', 'Noto Sans SC', sans-serif;
+  --font-body: 'Noto Sans SC', sans-serif;
+
+  background-color: var(--bg-color);
+  font-family: var(--font-body);
+  color: var(--text-main);
+  /* 移除了手帐本微网格背景以减少视觉干扰，保持背景纯净 */
+}
+
+.container {
+  padding: 30rpx;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 40rpx;
+  border: 6rpx solid #2D3436;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 8rpx 8rpx 0px #2D3436;
+}
+
+.btn-primary {
+  background-color: #FF6B6B;
+  color: #ffffff;
+  border: 6rpx solid #2D3436;
+  border-radius: 30rpx;
+  padding: 20rpx 40rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 900;
+  box-shadow: 6rpx 6rpx 0px #2D3436;
+  transition: all 0.2s;
+}
+
+.btn-primary:active {
+  transform: translate(4rpx, 4rpx);
+  box-shadow: 2rpx 2rpx 0px #2D3436;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-large {
+  font-size: 56rpx;
+  font-weight: 900;
+  color: #2D3436;
+}
+
+.text-medium {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #2D3436;
+}
+
+.text-small {
+  font-size: 28rpx;
+  color: #636E72;
+  font-weight: bold;
+}
+
+.input-field {
+  border: 6rpx solid #2D3436;
+  border-radius: 24rpx;
+  padding: 30rpx;
+  font-size: 34rpx;
+  margin-bottom: 30rpx;
+  background-color: #FFFDF7;
+  font-weight: bold;
+  color: #2D3436;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.input-field:focus {
+  background-color: #ffffff;
+  border-color: #4D96FF;
+  box-shadow: 4rpx 4rpx 0px #4D96FF;
+  transform: translateY(-2rpx);
+}

@@ -1,0 +1,178 @@
+.container {
+  padding: 40rpx 30rpx;
+  /* background-color is handled globally in app.wxss */
+  min-height: 100vh;
+}
+
+.project-info {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.project-name {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 40rpx;
+  font-weight: 900;
+  color: var(--text-main);
+  padding: 16rpx 40rpx;
+  background-color: var(--accent-yellow);
+  border-radius: var(--radius-lg);
+  border: var(--border-thin);
+  box-shadow: 4rpx 4rpx 0px var(--text-main);
+  transform: rotate(-2deg);
+}
+
+.timer-display {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: var(--border-thick);
+  padding: 80rpx 40rpx;
+  text-align: center;
+  margin-bottom: 60rpx;
+  box-shadow: var(--shadow-hard);
+  position: relative;
+  overflow: hidden;
+}
+
+.timer-time {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 120rpx;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: 4rpx;
+  margin-bottom: 20rpx;
+  text-shadow: 4rpx 4rpx 0px var(--accent-yellow);
+}
+
+.timer-hint {
+  display: block;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: var(--text-muted);
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 30rpx;
+  margin-bottom: 60rpx;
+}
+
+.control-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 50%;
+  border: var(--border-thick);
+  box-shadow: var(--shadow-hard);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.control-btn:active {
+  transform: translate(6rpx, 6rpx);
+  box-shadow: 2rpx 2rpx 0px var(--text-main);
+}
+
+.control-btn.start {
+  background-color: var(--accent-green);
+}
+
+.control-btn.pause {
+  background-color: var(--accent-yellow);
+}
+
+.control-btn.reset {
+  background-color: #FFFDF7;
+}
+
+.control-btn.save {
+  background-color: var(--accent-blue);
+}
+
+.control-icon {
+  font-size: 60rpx;
+  margin-bottom: 10rpx;
+  color: var(--text-main);
+}
+
+.control-text {
+  font-family: var(--font-display);
+  font-size: 30rpx;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.today-records {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  border: var(--border-thick);
+  padding: 40rpx;
+  box-shadow: var(--shadow-hard);
+}
+
+.section-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 40rpx;
+  font-weight: 900;
+  color: var(--text-main);
+  margin-bottom: 30rpx;
+  border-bottom: var(--border-thin);
+  padding-bottom: 20rpx;
+}
+
+.records-list {
+  margin-bottom: 20rpx;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 2rpx dashed var(--text-muted);
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-time {
+  font-family: var(--font-display);
+  font-size: 36rpx;
+  color: var(--text-main);
+  font-weight: 900;
+}
+
+.record-date {
+  font-size: 26rpx;
+  color: var(--text-muted);
+  font-weight: bold;
+}
+
+.today-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 30rpx;
+  border-top: var(--border-thin);
+  margin-top: 20rpx;
+}
+
+.summary-label {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: var(--text-main);
+}
+
+.summary-value {
+  font-family: var(--font-display);
+  font-size: 44rpx;
+  font-weight: 900;
+  color: var(--accent-red);
+}

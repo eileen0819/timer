@@ -1,0 +1,304 @@
+<wxs module="utils">
+module.exports = {
+  formatTime: function(seconds) {
+    if (!seconds) return '0分';
+    var h = Math.floor(seconds / 3600);
+    var m = Math.floor((seconds % 3600) / 60);
+    if (h > 0) {
+      return h + '小时' + (m > 0 ? m + '分' : '');
+    }
+    return m + '分钟';
+  }
+}
+</wxs>
+
+<view class="container">
+  <!-- Header 语义化区域 -->
+  <view class="header">
+    <view class="user-profile" bindtap="showSwitchChildDialog">
+      <view class="avatar">
+        <text class="avatar-emoji">👦</text>
+      </view>
+      <view class="greeting">
+        <text class="greeting-text">当前宝贝</text>
+        <view class="name-row">
+          <text class="greeting-name">{{currentChild ? currentChild.name : '未设置'}}</text>
+          <text class="switch-icon">🔄</text>
+        </view>
+      </view>
+    </view>
+    <view class="header-actions">
+      <button class="action-btn" bindtap="goToStatistics">
+        <text class="emoji-icon">📊</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- Main 语义化区域 -->
+  <view class="main">
+    <!-- 专注概览卡片 -->
+    <view class="focus-summary">
+      <text class="summary-label">Today's Focus</text>
+      <view class="summary-time">
+        <text class="time-value">{{totalTodayMinutes || 0}}</text>
+        <text class="time-unit">min</text>
+      </view>
+    </view>
+
+    <!-- 任务列表 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">Up Next</text>
+      </view>
+      
+      <view class="task-list" wx:if="{{groupedProjects.length > 0}}">
+        <block wx:for="{{groupedProjects}}" wx:key="id" wx:for-item="group">
+          <!-- 分类标题 -->
+          <view class="category-title" wx:if="{{group.items.length > 0}}">
+            <text class="category-icon">{{group.icon}}</text>
+            <text class="category-name">{{group.name}}</text>
+          </view>
+          
+          <view 
+            class="task-card" 
+            wx:for="{{group.items}}" 
+            wx:key="_id"
+            bindtap="showTimeInput"
+            data-id="{{item._id}}"
+            data-name="{{item.name}}"
+          >
+            <view class="task-icon" style="background-color: {{item.color}}; color: #fff;">
+              <text class="icon-text">{{item.name[0]}}</text>
+            </view>
+            <view class="task-content">
+              <text class="task-title">{{item.name}}</text>
+              <view class="task-meta">
+                <text class="emoji-icon" style="font-size: 24rpx; margin-right: 8rpx;">⏱️</text>
+                <text class="meta-text">{{utils.formatTime(item.todayTime)}} 今日 / 目标 {{item.targetTime ? utils.formatTime(item.targetTime) : '未设置'}}</text>
+              </view>
+            </view>
+            <view class="play-btn">
+              <text class="emoji-icon" style="font-size: 28rpx;">▶️</text>
+            </view>
+          </view>
+        </block>
+      </view>
+
+      <view class="empty-state" wx:if="{{groupedProjects.length === 0}}">
+        <text class="empty-icon">📚</text>
+        <text class="empty-text">还没有项目</text>
+        <text class="empty-hint">点击下方按钮添加第一个学习项目</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 悬浮操作按钮 -->
+  <view class="fab-container">
+    <button class="fab" bindtap="showAddProject" aria-label="Add new task">
+      <text class="emoji-icon" style="font-size: 56rpx; line-height: 1; margin-top: -8rpx;">➕</text>
+    </button>
+    
+    <!-- 开发者导入预置资源按钮 -->
+    <view style="padding: 40rpx 0;">
+      <button 
+        class="welcome-btn" 
+        style="background-color: var(--accent-blue); transform: rotate(0deg); width: 80%; margin: 0 auto; height: 90rpx; font-size: 28rpx;"
+        bindtap="importResourcesData"
+      >
+        <text>📦 导入资源库数据 (测试用)</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 底部导航栏 -->
+  <view class="footer">
+    <navigator url="/pages/index/index" class="nav-item active" open-type="redirect">
+      <text class="emoji-icon" style="font-size: 44rpx;">🏠</text>
+      <text class="nav-text">Home</text>
+    </navigator>
+    <navigator url="/pages/timer/timer" class="nav-item" open-type="navigate">
+      <text class="emoji-icon" style="font-size: 44rpx;">⏲️</text>
+      <text class="nav-text">Timer</text>
+    </navigator>
+    <navigator url="/pages/statistics/statistics" class="nav-item" open-type="navigate">
+      <text class="emoji-icon" style="font-size: 44rpx;">👤</text>
+      <text class="nav-text">Profile</text>
+    </navigator>
+  </view>
+
+  <!-- 切换宝贝弹窗 -->
+  <view class="modal" wx:if="{{showSwitchChildDialog}}" bindtap="hideSwitchChildDialog">
+    <view class="modal-content" catchtap="stopBubble">
+      <text class="modal-title">切换宝贝</text>
+      
+      <view class="child-list">
+        <view 
+          class="child-item {{currentChild._id === item._id ? 'active' : ''}}" 
+          wx:for="{{childrenList}}" 
+          wx:key="_id" 
+          bindtap="switchChild" 
+          data-child="{{item}}"
+        >
+          <view class="child-item-left">
+            <view class="child-avatar">👦</view>
+            <view class="child-info">
+              <text class="child-name">{{item.name}}</text>
+              <text class="child-age" wx:if="{{item.birthMonth}}">{{item.birthMonth}}</text>
+            </view>
+          </view>
+          <text class="check-icon" wx:if="{{currentChild._id === item._id}}">✅</text>
+        </view>
+        
+        <view class="child-item add-new" bindtap="showAddChildDialog">
+          <view class="child-item-left">
+            <view class="child-avatar add-avatar">➕</view>
+            <text class="child-name">添加新宝贝</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="modal-buttons">
+        <button class="btn-cancel btn-full" bindtap="hideSwitchChildDialog">关闭</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 添加宝贝弹窗 -->
+  <view class="modal" wx:if="{{showAddChildDialog}}" bindtap="hideAddChildDialog">
+    <view class="modal-content" catchtap="stopBubble">
+      <text class="modal-title">添加新宝贝</text>
+      
+      <input 
+        class="input-field" 
+        placeholder="宝贝昵称（如：大宝）"
+        value="{{newChildNameInput}}"
+        bindinput="onNewChildNameInput"
+      />
+      
+      <picker mode="date" fields="month" value="{{newChildBirthMonth}}" end="{{currentDate}}" bindchange="onNewChildBirthMonthChange">
+        <view class="input-field picker-view {{newChildBirthMonth ? 'has-value' : ''}}">
+          {{newChildBirthMonth || '选择出生年月（可选）'}}
+        </view>
+      </picker>
+      
+      <view class="modal-buttons">
+        <button class="btn-cancel" bindtap="hideAddChildDialog">取消</button>
+        <button class="btn-confirm" bindtap="confirmAddChild">确认</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 以下为原有弹窗逻辑，保持不变，仅更新部分类名以适配设计 -->
+  <!-- 添加项目弹窗 -->
+  <view class="modal" wx:if="{{showAddDialog}}" bindtap="hideAddDialog">
+    <view class="modal-content" catchtap="stopBubble">
+      <text class="modal-title">添加新项目</text>
+      
+      <input 
+        class="input-field" 
+        placeholder="请输入项目名称"
+        value="{{newProjectName}}"
+        bindinput="onProjectNameInput"
+      />
+      
+      <text class="color-label">选择分类</text>
+      <view class="category-picker">
+        <view 
+          class="category-option {{newProjectCategory === item.id ? 'selected' : ''}}" 
+          wx:for="{{categories}}"
+          wx:key="id"
+          bindtap="onCategorySelect"
+          data-id="{{item.id}}"
+        >
+          <text class="cat-icon">{{item.icon}}</text>
+          <text class="cat-name">{{item.name}}</text>
+        </view>
+      </view>
+      
+      <view class="modal-buttons">
+        <button class="btn-cancel" bindtap="hideAddDialog">取消</button>
+        <button class="btn-confirm" bindtap="addProject">确认</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 记录时长弹窗 -->
+  <view class="modal" wx:if="{{showTimeDialog}}" bindtap="hideTimeDialog">
+    <view class="modal-content" catchtap="stopBubble">
+      <text class="modal-title">记录时长 - {{selectedProjectName}}</text>
+      
+      <view class="time-inputs">
+        <view class="time-input-group">
+          <input 
+            class="time-input" 
+            type="number"
+            placeholder="0"
+            value="{{inputHours}}"
+            bindinput="onHoursInput"
+          />
+          <text class="time-unit">小时</text>
+        </view>
+        <text class="time-separator">:</text>
+        <view class="time-input-group">
+          <input 
+            class="time-input" 
+            type="number"
+            placeholder="0"
+            value="{{inputMinutes}}"
+            bindinput="onMinutesInput"
+          />
+          <text class="time-unit">分钟</text>
+        </view>
+      </view>
+      
+      <view class="modal-buttons">
+        <button class="btn-cancel" bindtap="hideTimeDialog">取消</button>
+        <button class="btn-confirm" bindtap="saveTimeRecord">确认</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 首次进入全屏欢迎引导页 -->
+  <view class="welcome-page" wx:if="{{showWelcomePage}}">
+    <view class="welcome-content">
+      <view class="welcome-icon-wrapper">
+        <text class="welcome-emoji">🎈</text>
+        <text class="welcome-emoji small-emoji left">🌟</text>
+        <text class="welcome-emoji small-emoji right">🧸</text>
+      </view>
+      
+      <text class="welcome-title">欢迎来到宝贝计时</text>
+      <text class="welcome-subtitle">记录每一次成长的美好时光</text>
+      
+      <view class="welcome-input-card">
+        <text class="welcome-input-label">添加第一个宝贝的昵称呀：</text>
+        <input 
+          class="welcome-input" 
+          placeholder="例如：小宝、乐乐"
+          placeholder-style="color: #B2BEC3; font-weight: normal;"
+          value="{{childNameInput}}"
+          bindinput="onChildNameInput"
+        />
+        
+        <text class="welcome-input-label" style="margin-top: 30rpx;">宝贝出生月份？（可选）</text>
+        <picker mode="date" fields="month" value="{{childBirthMonth}}" end="{{currentDate}}" bindchange="onChildBirthMonthChange">
+          <view class="welcome-input picker-view {{childBirthMonth ? 'has-value' : ''}}">
+            {{childBirthMonth || '选择年月 (如：2020-05)'}}
+          </view>
+        </picker>
+      </view>
+      
+      <button class="welcome-btn" bindtap="saveChildProfile">
+        <text>开启时光之旅</text>
+        <text class="btn-arrow">✨</text>
+      </button>
+    </view>
+    
+    <!-- 底部装饰图形 -->
+    <view class="welcome-decorations">
+      <view class="decor-circle blue"></view>
+      <view class="decor-circle yellow"></view>
+      <view class="decor-circle green"></view>
+    </view>
+  </view>
+</view>

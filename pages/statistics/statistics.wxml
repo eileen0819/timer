@@ -1,0 +1,88 @@
+<view class="container">
+  <view class="summary-cards">
+    <view class="summary-card">
+      <text class="card-value">{{formatTime(allTimeTotal)}}</text>
+      <text class="card-label">累计总时长</text>
+    </view>
+    <view class="summary-card">
+      <text class="card-value">{{formatTime(weekTotalTime)}}</text>
+      <text class="card-label">本周学习</text>
+    </view>
+    <view class="summary-card">
+      <text class="card-value">{{formatTime(averageTime)}}</text>
+      <text class="card-label">日均时长</text>
+    </view>
+  </view>
+
+  <view class="projects-section" wx:if="{{projectsData.length > 0}}">
+    <view class="section-header">
+      <text class="section-title">各项目累计时长</text>
+    </view>
+    <view class="project-list">
+      <view class="project-item" wx:for="{{projectsData}}" wx:key="_id">
+        <view class="project-info">
+          <view class="project-color" style="background-color: {{item.color}}"></view>
+          <text class="project-name">{{item.name}}</text>
+        </view>
+        <text class="project-time">{{formatTime(item.totalTime)}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="chart-section">
+    <view class="section-header">
+      <text class="section-title">本周学习趋势</text>
+      <text class="section-date">{{currentWeek}}</text>
+    </view>
+    <view class="week-chart">
+      <view class="chart-bars">
+        <view 
+          class="chart-bar-wrapper" 
+          wx:for="{{weeklyData}}" 
+          wx:key="index"
+        >
+          <view 
+            class="chart-bar" 
+            style="height: {{getBarHeight(item)}}rpx"
+          ></view>
+          <text class="bar-value" wx:if="{{item > 0}}">{{formatTime(item)}}</text>
+        </view>
+      </view>
+      <view class="week-labels">
+        <text class="week-label" wx:for="{{weekDays}}" wx:key="index">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="month-section">
+    <view class="section-header">
+      <text class="section-title">本月学习日历</text>
+      <text class="section-date">{{currentMonth}}</text>
+    </view>
+    <view class="month-grid">
+      <view 
+        class="month-day {{hasRecord(index + 1) ? 'active' : ''}}" 
+        wx:for="{{31}}" 
+        wx:key="index"
+      >
+        <text class="day-number">{{index + 1}}</text>
+        <view class="day-indicator" wx:if="{{hasRecord(index + 1)}}"></view>
+      </view>
+    </view>
+    <view class="month-legend">
+      <view class="legend-item">
+        <view class="legend-dot"></view>
+        <text class="legend-text">未学习</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot active"></view>
+        <text class="legend-text">已学习</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tips-section">
+    <text class="tips-title">💡 学习小贴士</text>
+    <text class="tips-text">每天坚持学习30分钟，一年下来你将学习超过180小时！</text>
+  </view>
+</view>
